@@ -66,6 +66,7 @@ class SessionFrame(wx.MDIChildFrame):
 def main():
 	app = wx.App()
 	frame = MainFrame(None, -1, "Client")
+	frame.Maximize()
 	frame.Show(True)
 	reactor.registerWxApp(app)
 	reactor.run()
