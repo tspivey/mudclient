@@ -112,7 +112,12 @@ class World(object):
 		print "ok"
 
 	def handle_line(self, line):
+		line = self.strip_ansi(line)
 		self.write_callback(line)
+
+	ansi_re = re.compile(r'\x1b\[\d+(?:;\d+)?m')
+	def strip_ansi(self, line):
+		return self.ansi_re.sub('', line)
 
 	def send(self, text):
 		self.protocol.transport.write(text)
