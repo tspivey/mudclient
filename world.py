@@ -2,6 +2,7 @@ import re
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 import protocol
+import lupa
 
 class NeedMoreDataException(Exception):
 	pass
@@ -28,6 +29,9 @@ class World(object):
 		self.protocol = None
 		#The callback called when we need to write a line to the user
 		self.write_callback = write_callback
+		#the lua runtime
+		self.runtime = lupa.LuaRuntime()
+		self.runtime.globals()['world'] = self
 
 	def handle_data(self, data):
 		"""Handle data received by the MUD."""
@@ -120,6 +124,8 @@ class World(object):
 		return self.ansi_re.sub('', line)
 
 	def send(self, text):
+		if isinstance(text, unicode):
+			text = text.encode('utf-8')
 		self.protocol.transport.write(text)
 
 	def connect(self, host, port):

@@ -42,14 +42,17 @@ class SessionFrame(wx.MDIChildFrame):
 		self.Show(True)
 		self.history_index = -1
 		self.world = world.World(self.append)
-		self.world.connect("192.168.134.4", 4000)
 
 	def on_key(self, evt):
 		if evt.GetKeyCode() == 13: #enter
 			text = self.input.GetValue().encode('utf-8')
-			self.world.send(text+"\r\n")
-			self.append(text+"\r\n", False)
-			self.input.Clear()
+			if text.startswith('$'):
+				self.world.runtime.eval(text[1:])
+				self.input.Clear()
+			else:
+				self.world.send(text+"\r\n")
+				self.append(text+"\r\n", False)
+				self.input.Clear()
 		else:
 			evt.Skip()
 
