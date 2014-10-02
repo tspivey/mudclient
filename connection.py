@@ -118,3 +118,14 @@ class Connection(object):
 
 	def send(self, text):
 		self.protocol.transport.write(text)
+
+	def on_connect(self):
+		self.world.write_callback("connected\n")
+
+	def on_disconnect(self, reason):
+		"""Event called when the world disconnected. Clear any
+		connection specific data and prepare for another connection."""
+		self.parse_all_data(True)
+		self.buffer = "" #clear any in-progress IAC sequences
+		self.has_ga = False
+		self.world.write_callback("Disconnected, reason: %s\n" % reason.getErrorMessage())

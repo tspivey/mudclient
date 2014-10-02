@@ -6,10 +6,13 @@ class Client(Protocol):
 		self.connection = connection
 
 	def connectionMade(self):
-		print "connected"
+		self.connection.on_connect()
 
 	def dataReceived(self, data):
 		self.connection.handle_data(data)
+
+	def connectionLost(self, reason):
+		self.connection.on_disconnect(reason)
 
 class ClientFactory(Factory):
 	def __init__(self, connection, *args, **kwargs):
