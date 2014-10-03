@@ -110,6 +110,8 @@ class Connection(object):
 		print "hs: %r" % data
 
 	def handle_option(self, type, opt):
+		if type == WILL and opt == chr(25):
+			self.send(IAC+DO+chr(25))
 		print "ok"
 
 	def connect(self, host, port):
