@@ -46,6 +46,9 @@ class SessionFrame(wx.MDIChildFrame):
 	def on_key(self, evt):
 		if evt.GetKeyCode() == 13: #enter
 			text = self.input.GetValue().encode('utf-8')
+			if text.strip():
+				self.world.history.append(text)
+				self.history_index = len(self.world.history)
 			if text.startswith('$'):
 				self.world.runtime.eval(text[1:])
 				self.input.Clear()
@@ -53,8 +56,28 @@ class SessionFrame(wx.MDIChildFrame):
 				self.world.send(text+"\r\n")
 				self.append(text+"\r\n", False)
 				self.input.Clear()
+		elif evt.GetKeyCode() == wx.WXK_UP:
+			self.previous_history()
+		elif evt.GetKeyCode() == wx.WXK_DOWN:
+			self.next_history()
 		else:
 			evt.Skip()
+
+	def previous_history(self):
+		if len(self.world.history) == 0 or self.history_index == 0:
+			return
+		self.history_index -= 1
+		self.input.SetValue(self.world.history[self.history_index])
+
+	def next_history(self):
+		if len(self.world.history) == 0:
+			return
+		if self.history_index + 1 >= len(self.world.history):
+			self.input.Clear()
+			self.history_index = len(self.world.history)
+			return
+		self.history_index += 1
+		self.input.SetValue(self.world.history[self.history_index])
 
 	def append(self, data, speak=True):
 		data = data.replace('\r\n', '\n')

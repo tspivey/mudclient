@@ -14,6 +14,8 @@ class World(object):
 		#the lua runtime
 		self.runtime = lupa.LuaRuntime()
 		self.runtime.globals()['world'] = self
+		#Input history, oldest to newest
+		self.history = []
 
 
 	def handle_line(self, line):
