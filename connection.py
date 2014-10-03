@@ -116,7 +116,11 @@ class Connection(object):
 
 	def connect(self, host, port):
 		point = TCP4ClientEndpoint(reactor, host, port)
-		point.connect(self.client_factory)
+		d = point.connect(self.client_factory)
+		d.addErrback(self.connection_failed)
+
+	def connection_failed(self, deferred):
+		self.world.write_callback("Failed to connect, reason: %s\n" % deferred.getErrorMessage())
 
 	def send(self, text):
 		self.protocol.transport.write(text)
