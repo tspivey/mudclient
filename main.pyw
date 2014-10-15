@@ -12,10 +12,12 @@ class MainFrame(wx.MDIParentFrame):
 		menubar = wx.MenuBar()
 		file_menu = wx.Menu()
 		new = file_menu.Append(wx.ID_NEW, "&New")
+		open_world = file_menu.Append(wx.ID_OPEN, "&Open...")
 		quit = file_menu.Append(wx.ID_EXIT, "E&xit")
 		menubar.Append(file_menu, "&File")
 		self.SetMenuBar(menubar)
 		self.Bind(wx.EVT_MENU, self.on_new, new)
+		self.Bind(wx.EVT_MENU, self.on_open, open_world)
 		self.Bind(wx.EVT_MENU, self.on_quit, quit)
 		self.windows = {}
 
@@ -25,6 +27,20 @@ class MainFrame(wx.MDIParentFrame):
 	def on_new(self, evt):
 		w = world.World()
 		frame = SessionFrame(w, self, -1, "Untitled")
+		frame.Maximize()
+		application.worlds.append(frame)
+
+	def on_open(self, evt):
+		dlg = wx.FileDialog(self, "Open", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+		if dlg.ShowModal() != wx.ID_OK:
+			return
+		w = world.World()
+		try:
+			w.load_config(dlg.GetPath())
+		except Exception as e:
+			wx.MessageBox(str(e), "Error loading world", style=wx.OK | wx.ICON_ERROR)
+			raise
+		frame = SessionFrame(w, self, -1, w.config['name'])
 		frame.Maximize()
 		application.worlds.append(frame)
 
@@ -44,6 +60,8 @@ class SessionFrame(wx.MDIChildFrame):
 		self.history_index = -1
 		self.world = world
 		self.world.write_callback = self.append
+		if 'host' in self.world.config and 'port' in self.world.config:
+			self.world.connect(self.world.config['host'], self.world.config['port'])
 
 	def on_key(self, evt):
 		if evt.GetKeyCode() == 13: #enter
