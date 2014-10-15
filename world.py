@@ -3,7 +3,7 @@ from twisted.internet import reactor
 import protocol
 import connection
 import lupa
-
+import yaml
 
 class World(object):
 
@@ -33,3 +33,9 @@ class World(object):
 
 	def connect(self, host, port):
 		self.connection.connect(host, port)
+
+	def load_config(self, path):
+		with open(path, 'rb') as fp:
+			self.config = yaml.safe_load(fp)
+		if 'name' not in self.config:
+			self.config['name'] = 'Untitled'
