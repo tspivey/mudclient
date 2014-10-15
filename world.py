@@ -7,7 +7,7 @@ import lupa
 
 class World(object):
 
-	def __init__(self, write_callback):
+	def __init__(self, write_callback=None):
 		#The callback called when we need to write a line to the user
 		self.write_callback = write_callback
 		self.connection = connection.Connection(self)
