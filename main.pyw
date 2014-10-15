@@ -23,12 +23,13 @@ class MainFrame(wx.MDIParentFrame):
 		reactor.stop()
 
 	def on_new(self, evt):
-		frame = SessionFrame(self, -1, "Untitled")
+		w = world.World()
+		frame = SessionFrame(w, self, -1, "Untitled")
 		frame.Maximize()
 		application.worlds.append(frame)
 
 class SessionFrame(wx.MDIChildFrame):
-	def __init__(self, parent, *args, **kwargs):
+	def __init__(self, world, parent, *args, **kwargs):
 		super(SessionFrame, self).__init__(parent, *args, **kwargs)
 		self.parent = parent
 		self.input = wx.TextCtrl(self)
@@ -41,7 +42,8 @@ class SessionFrame(wx.MDIChildFrame):
 		self.input.Bind(wx.EVT_KEY_DOWN, self.on_key)
 		self.Show(True)
 		self.history_index = -1
-		self.world = world.World(self.append)
+		self.world = world
+		self.world.write_callback = self.append
 
 	def on_key(self, evt):
 		if evt.GetKeyCode() == 13: #enter
