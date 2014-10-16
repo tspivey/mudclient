@@ -35,6 +35,9 @@ class World(object):
 	def connect(self, host, port):
 		self.connection.connect(host, port)
 
+	def disconnect(self):
+		self.connection.disconnect()
+
 	def load_config(self, path):
 		with open(path, 'rb') as fp:
 			self.config = yaml.safe_load(fp)

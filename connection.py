@@ -135,3 +135,6 @@ class Connection(object):
 		self.buffer = "" #clear any in-progress IAC sequences
 		self.has_ga = False
 		self.world.write_callback("Disconnected, reason: %s\n" % reason.getErrorMessage())
+
+	def disconnect(self):
+		self.protocol.transport.loseConnection()
