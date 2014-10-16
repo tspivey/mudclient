@@ -19,6 +19,7 @@ class MainFrame(wx.MDIParentFrame):
 		self.Bind(wx.EVT_MENU, self.on_new, new)
 		self.Bind(wx.EVT_MENU, self.on_open, open_world)
 		self.Bind(wx.EVT_MENU, self.on_quit, quit)
+		self.Bind(wx.EVT_CLOSE, self.on_quit)
 		self.windows = {}
 
 	def on_quit(self, evt):
