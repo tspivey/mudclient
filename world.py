@@ -16,6 +16,7 @@ class World(object):
 		self.runtime.globals()['world'] = self
 		#Input history, oldest to newest
 		self.history = []
+		self.config = {}
 
 
 	def handle_line(self, line):
