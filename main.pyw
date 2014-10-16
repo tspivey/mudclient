@@ -12,7 +12,7 @@ class MainFrame(wx.MDIParentFrame):
 		menubar = wx.MenuBar()
 		file_menu = wx.Menu()
 		new = file_menu.Append(wx.ID_NEW, "&New")
-		open_world = file_menu.Append(wx.ID_OPEN, "&Open...")
+		open_world = file_menu.Append(wx.ID_OPEN, "&Open...\tCtrl+O")
 		quit = file_menu.Append(wx.ID_EXIT, "E&xit")
 		menubar.Append(file_menu, "&File")
 		self.SetMenuBar(menubar)
