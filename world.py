@@ -4,6 +4,7 @@ import protocol
 import connection
 import lupa
 import yaml
+import os
 
 class World(object):
 
@@ -43,3 +44,8 @@ class World(object):
 			self.config = yaml.safe_load(fp)
 		if 'name' not in self.config:
 			self.config['name'] = 'Untitled'
+
+	def load_script_file(self):
+		script_file = self.config.get('script_file', None)
+		if script_file and os.path.exists(script_file):
+			self.runtime.globals().dofile(script_file)
