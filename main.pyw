@@ -61,6 +61,11 @@ class SessionFrame(wx.MDIChildFrame):
 		self.history_index = -1
 		self.world = world
 		self.world.write_callback = self.append
+		try:
+			self.world.load_script_file()
+		except Exception as e:
+			self.world.write_callback("Error loading script file: %s\n" % e)
+			return
 		if 'host' in self.world.config and 'port' in self.world.config:
 			self.world.connect(self.world.config['host'], self.world.config['port'])
 
