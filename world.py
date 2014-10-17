@@ -15,6 +15,7 @@ class World(object):
 		#the lua runtime
 		self.runtime = lupa.LuaRuntime()
 		self.runtime.globals()['world'] = self
+		self.runtime.globals().send = self.send
 		#Input history, oldest to newest
 		self.history = []
 		self.config = {}
