@@ -31,7 +31,7 @@ class World(object):
 	def send(self, text):
 		if isinstance(text, unicode):
 			text = text.encode('utf-8')
-		self.connection.send(text)
+		self.connection.send(text+"\n")
 
 	def connect(self, host, port):
 		self.connection.connect(host, port)

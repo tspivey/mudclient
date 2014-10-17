@@ -79,7 +79,7 @@ class SessionFrame(wx.MDIChildFrame):
 				self.world.runtime.eval(text[1:])
 				self.input.Clear()
 			else:
-				self.world.send(text+"\r\n")
+				self.world.send(text)
 				self.append(text+"\r\n", False)
 				self.input.Clear()
 		elif evt.GetKeyCode() == wx.WXK_UP:
