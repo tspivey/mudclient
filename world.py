@@ -50,3 +50,7 @@ class World(object):
 		script_file = self.config.get('script_file', None)
 		if script_file and os.path.exists(script_file):
 			self.runtime.globals().dofile(script_file)
+
+	def input(self, line):
+		self.send(line)
+
