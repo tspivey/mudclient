@@ -16,9 +16,11 @@ class World(object):
 		self.runtime = lupa.LuaRuntime()
 		self.runtime.globals()['world'] = self
 		self.runtime.globals().send = self.send
+		self.runtime.globals().alias = self.alias
 		#Input history, oldest to newest
 		self.history = []
 		self.config = {}
+		self.aliases = []
 
 
 	def handle_line(self, line):
@@ -52,5 +54,15 @@ class World(object):
 			self.runtime.globals().dofile(script_file)
 
 	def input(self, line):
+		for match, func in self.aliases:
+			res = match.search(line)
+			if res:
+				#We want a list for translating None into ""
+				groups = [g or "" for g in res.groups()]
+				func(self.runtime.table(*groups))
+				return
 		self.send(line)
 
+	def alias(self, match, func):
+		match = re.compile(match)
+		self.aliases.append((match, func))
