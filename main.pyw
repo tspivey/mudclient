@@ -5,6 +5,9 @@ wxreactor.install()
 from twisted.internet import reactor
 import world
 import protocol
+from keyboard_handler.wx_handler import WXKeyboardHandler
+
+key_handler = WXKeyboardHandler(None)
 
 class MainFrame(wx.MDIParentFrame):
 	def __init__(self, *args, **kwargs):
@@ -59,8 +62,10 @@ class SessionFrame(wx.MDIChildFrame):
 		self.input.Bind(wx.EVT_KEY_DOWN, self.on_key)
 		self.Show(True)
 		self.history_index = -1
+		self.keys = {}
 		self.world = world
 		self.world.write_callback = self.append
+		self.world.runtime.globals()['bind'] = self.bind_key
 		try:
 			self.world.load_script_file()
 		except Exception as e:
@@ -70,7 +75,10 @@ class SessionFrame(wx.MDIChildFrame):
 			self.world.connect(self.world.config['host'], self.world.config['port'])
 
 	def on_key(self, evt):
-		if evt.GetKeyCode() == 13: #enter
+		key = evt.GetModifiers(), evt.GetKeyCode()
+		if key in self.keys:
+			self.keys[key]()
+		elif evt.GetKeyCode() == 13: #enter
 			text = self.input.GetValue().encode('utf-8')
 			if text.strip():
 				self.world.history.append(text)
@@ -114,6 +122,14 @@ class SessionFrame(wx.MDIChildFrame):
 			self.output.SetInsertionPoint(location)
 		if speak and data.strip():
 			application.output.speak(data)
+
+	def bind_key(self, key, func):
+		value = key_handler.parse_key(key)
+		if func is None:
+			if value in self.keys:
+				del self.keys[value]
+			return
+		self.keys[value] = func
 
 def main():
 	app = wx.App()
