@@ -30,9 +30,8 @@ class MainFrame(wx.MDIParentFrame):
 
 	def on_new(self, evt):
 		w = world.World()
-		frame = SessionFrame(w, self, -1, "Untitled")
-		frame.Maximize()
-		application.worlds.append(frame)
+		frame = self.create_frame(w)
+		w.finalize()
 
 	def on_open(self, evt):
 		dlg = wx.FileDialog(self, "Open", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
@@ -44,9 +43,14 @@ class MainFrame(wx.MDIParentFrame):
 		except Exception as e:
 			wx.MessageBox(str(e), "Error loading world", style=wx.OK | wx.ICON_ERROR)
 			raise
-		frame = SessionFrame(w, self, -1, w.config['name'])
+		frame = self.create_frame(w)
+		w.finalize()
+
+	def create_frame(self, world):
+		frame = SessionFrame(world, parent=self, id=-1, title=world.config.get('name', "Untitled"))
 		frame.Maximize()
 		application.worlds.append(frame)
+		return frame
 
 class SessionFrame(wx.MDIChildFrame):
 	def __init__(self, world, parent, *args, **kwargs):
@@ -66,13 +70,6 @@ class SessionFrame(wx.MDIChildFrame):
 		self.world = world
 		self.world.write_callback = self.append
 		self.world.runtime.globals()['bind'] = self.bind_key
-		try:
-			self.world.load_script_file()
-		except Exception as e:
-			self.world.write_callback("Error loading script file: %s\n" % e)
-			return
-		if 'host' in self.world.config and 'port' in self.world.config:
-			self.world.connect(self.world.config['host'], self.world.config['port'])
 
 	def on_key(self, evt):
 		key = evt.GetModifiers(), evt.GetKeyCode()

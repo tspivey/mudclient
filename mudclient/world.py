@@ -95,3 +95,12 @@ class World(object):
 			options = {}
 		trigger = Trigger(pattern, func, **options)
 		self.triggers.append(trigger)
+
+	def finalize(self):
+		try:
+			self.load_script_file()
+		except Exception as e:
+			self.write_callback("Error loading script file: %s\n" % e)
+			return
+		if 'host' in self.config and 'port' in self.config:
+			self.connect(self.config['host'], self.config['port'])
