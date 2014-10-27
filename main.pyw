@@ -102,6 +102,7 @@ class SessionFrame(wx.MDIChildFrame):
 			return
 		self.history_index -= 1
 		self.input.SetValue(self.world.history[self.history_index])
+		self.input.SetInsertionPoint(self.input.GetLastPosition())
 
 	def next_history(self):
 		if len(self.world.history) == 0:
@@ -112,6 +113,7 @@ class SessionFrame(wx.MDIChildFrame):
 			return
 		self.history_index += 1
 		self.input.SetValue(self.world.history[self.history_index])
+		self.input.SetInsertionPoint(self.input.GetLastPosition())
 
 	def append(self, data, speak=True):
 		data = data.replace('\r\n', '\n')
