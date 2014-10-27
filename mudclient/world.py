@@ -37,7 +37,7 @@ class World(object):
 				continue
 			if trigger.function is not None:
 				groups = [g or "" for g in match.groups()]
-				trigger.function(self.runtime.table(*groups))
+				trigger.function(self.runtime.table(*groups), line)
 			if trigger.omit:
 				return
 			break
