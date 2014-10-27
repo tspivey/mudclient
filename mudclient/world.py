@@ -35,8 +35,9 @@ class World(object):
 			match = trigger.match(line)
 			if match is None:
 				continue
-			groups = [g or "" for g in match.groups()]
-			trigger.function(self.runtime.table(*groups))
+			if trigger.function is not None:
+				groups = [g or "" for g in match.groups()]
+				trigger.function(self.runtime.table(*groups))
 			if trigger.omit:
 				return
 			break
