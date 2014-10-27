@@ -31,15 +31,16 @@ class World(object):
 
 	def handle_line(self, line):
 		line = self.strip_ansi(line)
+		matchline = line.rstrip('\n')
 		for trigger in self.triggers:
 			if not trigger.enabled:
 				continue
-			match = trigger.match(line)
+			match = trigger.match(matchline)
 			if match is None:
 				continue
 			if trigger.function is not None:
 				groups = [g or "" for g in match.groups()]
-				trigger.function(self.runtime.table(*groups), line)
+				trigger.function(self.runtime.table(*groups), matchline)
 			if trigger.omit:
 				return
 			break
