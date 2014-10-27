@@ -5,6 +5,7 @@ import connection
 import lupa
 import yaml
 import os
+from triggers import Trigger
 
 class World(object):
 
@@ -17,14 +18,27 @@ class World(object):
 		self.runtime.globals()['world'] = self
 		self.runtime.globals().send = self.send
 		self.runtime.globals().alias = self.alias
+		self.runtime.globals().trigger = self.trigger
 		#Input history, oldest to newest
 		self.history = []
 		self.config = {}
 		self.aliases = []
+		self.triggers = []
 
 
 	def handle_line(self, line):
 		line = self.strip_ansi(line)
+		for trigger in self.triggers:
+			if not trigger.enabled:
+				continue
+			match = trigger.match(line)
+			if match is None:
+				continue
+			groups = [g or "" for g in match.groups()]
+			trigger.function(self.runtime.table(*groups))
+			if trigger.omit:
+				return
+			break
 		self.write_callback(line)
 
 	ansi_re = re.compile(r'\x1b\[\d+(?:;\d+)?m')
@@ -66,3 +80,10 @@ class World(object):
 	def alias(self, match, func):
 		match = re.compile(match)
 		self.aliases.append((match, func))
+
+	def trigger(self, match, func, options=None):
+		pattern = re.compile(match)
+		if options is None:
+			options = {}
+		trigger = Trigger(pattern, func, **options)
+		self.triggers.append(trigger)
