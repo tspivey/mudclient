@@ -6,6 +6,7 @@ import lupa
 import yaml
 import os
 from triggers import Trigger
+import application
 
 class World(object):
 
@@ -19,6 +20,7 @@ class World(object):
 		self.runtime.globals().send = self.send
 		self.runtime.globals().alias = self.alias
 		self.runtime.globals().trigger = self.trigger
+		self.runtime.globals().output = application.output
 		#Input history, oldest to newest
 		self.history = []
 		self.config = {}
