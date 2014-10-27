@@ -22,6 +22,7 @@ class World(object):
 		#Input history, oldest to newest
 		self.history = []
 		self.config = {}
+		self.config_file = None
 		self.aliases = []
 		self.triggers = []
 
@@ -57,6 +58,7 @@ class World(object):
 		self.connection.disconnect()
 
 	def load_config(self, path):
+		self.config_file = os.path.abspath(path)
 		with open(path, 'rb') as fp:
 			self.config = yaml.safe_load(fp)
 		if 'name' not in self.config:
@@ -64,6 +66,8 @@ class World(object):
 
 	def load_script_file(self):
 		script_file = self.config.get('script_file', None)
+		if script_file:
+			script_file = os.path.join(os.path.dirname(self.config_file), script_file)
 		if script_file and os.path.exists(script_file):
 			self.runtime.globals().dofile(script_file)
 
