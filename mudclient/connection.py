@@ -7,6 +7,7 @@ import protocol
 IAC = chr(255)
 EOR = chr(239)
 SE = chr(240)
+NOP = chr(241)
 GA = chr(249)
 SB = chr(250)
 WILL = chr(251)
@@ -75,6 +76,8 @@ class Connection(object):
 				return
 			self.handle_subnegotiation(data[:pos+2])
 			return pos+2
+		elif data[1] == NOP:
+			return 2
 		else: #Don't know what this is
 			self.parsed += data[1]
 			return 2
