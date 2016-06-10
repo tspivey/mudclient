@@ -1,3 +1,4 @@
+import os
 import application
 import wx
 from twisted.internet import wxreactor
@@ -6,6 +7,8 @@ from twisted.internet import reactor
 import world
 import protocol
 from keyboard_handler.wx_handler import WXKeyboardHandler
+import yaml
+import time
 
 key_handler = WXKeyboardHandler(None)
 
@@ -26,6 +29,18 @@ class MainFrame(wx.MDIParentFrame):
 		self.Bind(wx.EVT_MENU, self.on_reload, reload)
 		self.Bind(wx.EVT_CLOSE, self.on_quit)
 		self.windows = {}
+
+	def load_config(self):
+		config_path = os.path.join(os.environ['userprofile'], 'mudclient.yaml')
+		if not os.path.exists(config_path):
+			return
+		with open(config_path, 'rb') as fp:
+			try:
+				application.config = yaml.safe_load(fp)
+			except Exception as e:
+				dlg = wx.MessageDialog(parent=self, caption="Error loading configuration file", message="%s" % str(e))
+				dlg.ShowModal()
+				wx.Exit()
 
 	def on_quit(self, evt):
 		reactor.stop()
@@ -79,11 +94,30 @@ class SessionFrame(wx.MDIChildFrame):
 		self.world = world
 		self.world.write_callback = self.append
 		self.world.runtime_initializing_callback = self.runtime_initializing
+		self.log_fp = None
+		log_filename = self.get_log_filename()
+		if log_filename:
+			dn = os.path.dirname(log_filename)
+			if not os.path.isdir(dn):
+				os.makedirs(dn)
+			self.log_fp = open(log_filename, 'ab')
+			self.log_fp.write(os.linesep)
+			timestr = time.strftime('%Y-%m-%d %H:%M:%S')
+			self.append(u"Logging to %s at %s\r\n" % (log_filename, timestr))
 
 	def runtime_initializing(self):
 		self.keys.clear()
 		self.world.runtime.globals()['bind'] = self.bind_key
 		self.append("Initializing runtime\r\n")
+
+	def get_log_filename(self):
+		if 'log_directory' not in application.config:
+			return None
+		log_filename = application.config.get('log_format', '%L%N.txt')
+		log_dir = os.path.realpath(application.config['log_directory'])
+		log_filename = log_filename.replace('%L', log_dir+os.sep)
+		log_filename = log_filename.replace('%N', self.world.config['name'])
+		return log_filename
 
 	def on_key(self, evt):
 		key = evt.GetModifiers(), evt.GetKeyCode()
@@ -135,6 +169,8 @@ class SessionFrame(wx.MDIChildFrame):
 			self.output.SetInsertionPoint(location)
 		if speak and data.strip():
 			application.output.speak(data)
+		if self.log_fp is not None:
+			self.log_fp.write(data)
 
 	def bind_key(self, key, func):
 		value = key_handler.parse_key(key)
@@ -149,6 +185,7 @@ def main():
 	frame = MainFrame(None, -1, "Client")
 	frame.Maximize()
 	frame.Show(True)
+	wx.CallAfter(frame.load_config)
 	reactor.registerWxApp(app)
 	reactor.run()
 
