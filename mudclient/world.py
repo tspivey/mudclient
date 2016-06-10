@@ -13,14 +13,9 @@ class World(object):
 	def __init__(self, write_callback=None):
 		#The callback called when we need to write a line to the user
 		self.write_callback = write_callback
+		self.runtime_initializing_callback = None
 		self.connection = connection.Connection(self)
-		#the lua runtime
-		self.runtime = lupa.LuaRuntime()
-		self.runtime.globals()['world'] = self
-		self.runtime.globals().send = self.send
-		self.runtime.globals().alias = self.alias
-		self.runtime.globals().trigger = self.trigger
-		self.runtime.globals().output = application.output
+		self.init_runtime()
 		#Input history, oldest to newest
 		self.history = []
 		self.config = {}
@@ -28,6 +23,22 @@ class World(object):
 		self.aliases = []
 		self.triggers = []
 
+
+	def init_runtime(self):
+		if self.runtime_initializing_callback is not None:
+			self.runtime_initializing_callback()
+		self.runtime = lupa.LuaRuntime()
+		self.runtime.globals()['world'] = self
+		self.runtime.globals().send = self.send
+		self.runtime.globals().alias = self.alias
+		self.runtime.globals().trigger = self.trigger
+		self.runtime.globals().output = application.output
+
+	def reload_runtime(self):
+		self.triggers = []
+		self.aliases = []
+		self.init_runtime()
+		self.load_script_file()
 
 	def handle_line(self, line):
 		line = self.strip_ansi(line)
@@ -97,6 +108,7 @@ class World(object):
 		self.triggers.append(trigger)
 
 	def finalize(self):
+		self.init_runtime()
 		try:
 			self.load_script_file()
 		except Exception as e:

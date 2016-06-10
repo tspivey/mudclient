@@ -16,12 +16,14 @@ class MainFrame(wx.MDIParentFrame):
 		file_menu = wx.Menu()
 		new = file_menu.Append(wx.ID_NEW, "&New")
 		open_world = file_menu.Append(wx.ID_OPEN, "&Open...\tCtrl+O")
+		reload = file_menu.Append(wx.ID_ANY, "&Reload runtime\tctrl+shift+r")
 		quit = file_menu.Append(wx.ID_EXIT, "E&xit")
 		menubar.Append(file_menu, "&File")
 		self.SetMenuBar(menubar)
 		self.Bind(wx.EVT_MENU, self.on_new, new)
 		self.Bind(wx.EVT_MENU, self.on_open, open_world)
 		self.Bind(wx.EVT_MENU, self.on_quit, quit)
+		self.Bind(wx.EVT_MENU, self.on_reload, reload)
 		self.Bind(wx.EVT_CLOSE, self.on_quit)
 		self.windows = {}
 
@@ -46,6 +48,9 @@ class MainFrame(wx.MDIParentFrame):
 		frame = self.create_frame(w)
 		w.finalize()
 
+	def on_reload(self, evt):
+		self.GetActiveChild().world.reload_runtime()
+
 	def create_frame(self, world):
 		frame = SessionFrame(world, parent=self, id=-1, title=world.config.get('name', "Untitled"))
 		frame.Maximize()
@@ -69,7 +74,12 @@ class SessionFrame(wx.MDIChildFrame):
 		self.keys = {}
 		self.world = world
 		self.world.write_callback = self.append
+		self.world.runtime_initializing_callback = self.runtime_initializing
+
+	def runtime_initializing(self):
+		self.keys.clear()
 		self.world.runtime.globals()['bind'] = self.bind_key
+		self.append("Initializing runtime\r\n")
 
 	def on_key(self, evt):
 		key = evt.GetModifiers(), evt.GetKeyCode()
