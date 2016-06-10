@@ -88,6 +88,7 @@ class SessionFrame(wx.MDIChildFrame):
 		self.SetSizerAndFit(self.sizer)
 		#When enter is pressed, don't beep, send input
 		self.input.Bind(wx.EVT_KEY_DOWN, self.on_key)
+		self.Bind(wx.EVT_CLOSE, self.on_close)
 		self.Show(True)
 		self.history_index = -1
 		self.keys = {}
@@ -118,6 +119,10 @@ class SessionFrame(wx.MDIChildFrame):
 		log_filename = log_filename.replace('%L', log_dir+os.sep)
 		log_filename = log_filename.replace('%N', self.world.config['name'])
 		return log_filename
+
+	def on_close(self, evt):
+		self.world.disconnect()
+		evt.Skip()
 
 	def on_key(self, evt):
 		key = evt.GetModifiers(), evt.GetKeyCode()
