@@ -167,7 +167,7 @@ class SessionFrame(wx.MDIChildFrame):
 		self.output.AppendText(data)
 		if self.FindFocus() == self.output:
 			self.output.SetInsertionPoint(location)
-		if speak and data.strip():
+		if self.IsActive() and speak and data.strip():
 			application.output.speak(data)
 		if self.log_fp is not None:
 			self.log_fp.write(data)
