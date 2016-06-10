@@ -31,8 +31,13 @@ class World(object):
 		self.runtime.globals().alias = self.alias
 		self.runtime.globals().trigger = self.trigger
 		self.runtime.globals().output = application.output
+		self.runtime.globals()['print'] = self.print_
 		if self.runtime_initializing_callback is not None:
 			self.runtime_initializing_callback()
+
+	def print_(self, *args):
+		s = " ".join([str(a) for a in args])
+		self.write_callback(s+"\r\n")
 
 	def reload_runtime(self):
 		self.triggers = []
