@@ -61,11 +61,15 @@ class SessionFrame(wx.MDIChildFrame):
 	def __init__(self, world, parent, *args, **kwargs):
 		super(SessionFrame, self).__init__(parent, *args, **kwargs)
 		self.parent = parent
-		self.input = wx.TextCtrl(self)
-		self.output = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
+		panel = wx.Panel(self)
+		panel_sizer = wx.BoxSizer(wx.VERTICAL)
+		self.input = wx.TextCtrl(panel, style=wx.TE_PROCESS_ENTER)
+		self.output = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
+		panel_sizer.Add(self.output, 8, wx.EXPAND)
+		panel_sizer.Add(self.input, 1, wx.EXPAND)
+		panel.SetSizer(panel_sizer)
 		self.sizer = wx.BoxSizer(wx.VERTICAL)
-		self.sizer.Add(self.output, 8, wx.EXPAND)
-		self.sizer.Add(self.input, 1, wx.EXPAND)
+		self.sizer.Add(panel, 0, wx.EXPAND | wx.ALL)
 		self.SetSizerAndFit(self.sizer)
 		#When enter is pressed, don't beep, send input
 		self.input.Bind(wx.EVT_KEY_DOWN, self.on_key)
