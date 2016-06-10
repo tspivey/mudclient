@@ -25,14 +25,14 @@ class World(object):
 
 
 	def init_runtime(self):
-		if self.runtime_initializing_callback is not None:
-			self.runtime_initializing_callback()
 		self.runtime = lupa.LuaRuntime()
 		self.runtime.globals()['world'] = self
 		self.runtime.globals().send = self.send
 		self.runtime.globals().alias = self.alias
 		self.runtime.globals().trigger = self.trigger
 		self.runtime.globals().output = application.output
+		if self.runtime_initializing_callback is not None:
+			self.runtime_initializing_callback()
 
 	def reload_runtime(self):
 		self.triggers = []
