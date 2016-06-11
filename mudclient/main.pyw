@@ -9,6 +9,7 @@ import protocol
 from keyboard_handler.wx_handler import WXKeyboardHandler
 import yaml
 import time
+import lupa
 
 key_handler = WXKeyboardHandler(None)
 
@@ -69,7 +70,7 @@ class MainFrame(wx.MDIParentFrame):
 	def create_frame(self, world):
 		frame = SessionFrame(world, parent=self, id=-1, title=world.config.get('name', "Untitled"))
 		frame.Maximize()
-		application.worlds.append(frame)
+		application.worlds[world.config.get('name', "Untitled")] = world
 		return frame
 
 class SessionFrame(wx.MDIChildFrame):
@@ -109,7 +110,12 @@ class SessionFrame(wx.MDIChildFrame):
 	def runtime_initializing(self):
 		self.keys.clear()
 		self.world.runtime.globals()['bind'] = self.bind_key
+		self.world.runtime.globals()['get_world'] = self.get_world
+		self.world.runtime.globals()['worlds'] = lupa.as_attrgetter(application.worlds)
 		self.append("Initializing runtime\r\n")
+
+	def get_world(self, world):
+		return application.worlds.get(world)
 
 	def get_log_filename(self):
 		if 'log_directory' not in application.config:
