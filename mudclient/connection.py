@@ -105,6 +105,7 @@ class Connection(object):
 		elif cur < len(self.parsed) - 1:
 			#Parse the incomplete line
 			remaining = self.parsed[cur:]
+			remaining = remaining.replace('\0', '')
 			self.world.handle_line(remaining)
 			cur += len(remaining)
 		self.parsed = self.parsed[cur:]
