@@ -128,6 +128,7 @@ class SessionFrame(wx.MDIChildFrame):
 
 	def on_close(self, evt):
 		self.world.disconnect()
+		del application.worlds[self.world.config.get('name', "Untitled")]
 		evt.Skip()
 
 	def on_key(self, evt):
