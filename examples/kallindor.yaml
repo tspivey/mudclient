@@ -1,0 +1,4 @@
+name: Kallindor
+host: kallindor.com
+port: 5800
+script_file: kallindor.lua
