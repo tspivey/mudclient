@@ -47,6 +47,7 @@ class World(object):
 		self.load_script_file()
 
 	def handle_line(self, line):
+		line = line.decode('utf-8')
 		line = self.strip_ansi(line)
 		matchline = line.rstrip('\n')
 		for trigger in self.triggers:
@@ -72,7 +73,7 @@ class World(object):
 		return self.ansi_re.sub('', line)
 
 	def send(self, text):
-		if isinstance(text, unicode):
+		if isinstance(text, six.text_type):
 			text = text.encode('utf-8')
 		self.connection.send(text+b"\n")
 
