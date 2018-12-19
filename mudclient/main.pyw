@@ -10,6 +10,7 @@ from keyboard_handler.wx_handler import WXKeyboardHandler
 import yaml
 import time
 import lupa
+import io
 
 key_handler = WXKeyboardHandler(None)
 
@@ -102,7 +103,7 @@ class SessionFrame(wx.MDIChildFrame):
 			dn = os.path.dirname(log_filename)
 			if not os.path.isdir(dn):
 				os.makedirs(dn)
-			self.log_fp = open(log_filename, 'ab')
+			self.log_fp = io.open(log_filename, 'a', encoding='utf-8')
 			self.log_fp.write(os.linesep)
 			timestr = time.strftime('%Y-%m-%d %H:%M:%S')
 			self.append(u"Logging to %s at %s\r\n" % (log_filename, timestr))
@@ -136,12 +137,12 @@ class SessionFrame(wx.MDIChildFrame):
 		if key in self.keys:
 			self.keys[key]()
 		elif evt.GetKeyCode() == 13: #enter
-			text = self.input.GetValue().encode('utf-8')
+			text = self.input.GetValue()
 			if text.strip():
 				self.world.history.append(text)
 				self.history_index = len(self.world.history)
 			if text.startswith('$'):
-				self.world.runtime.eval(text[1:])
+				self.world.runtime.eval(text[1:].encode('utf-8'))
 				self.input.Clear()
 			else:
 				self.world.input(text)

@@ -2,18 +2,19 @@ import re
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 import protocol
+from six import int2byte
 
 #Telnet protocol constants
-IAC = chr(255)
-EOR = chr(239)
-SE = chr(240)
-NOP = chr(241)
-GA = chr(249)
-SB = chr(250)
-WILL = chr(251)
-WONT = chr(252)
-DO = chr(253)
-DONT = chr(254)
+IAC = int2byte(255)
+EOR = int2byte(239)
+SE = int2byte(240)
+NOP = int2byte(241)
+GA = int2byte(249)
+SB = int2byte(250)
+WILL = int2byte(251)
+WONT = int2byte(252)
+DO = int2byte(253)
+DONT = int2byte(254)
 
 class NeedMoreDataException(Exception):
 	pass
@@ -22,9 +23,9 @@ class Connection(object):
 
 	def __init__(self, world):
 		self.world = world
-		self.parsed = ""
+		self.parsed = b""
 		#Store the telnet negotiation sequences here until we fully have them
-		self.buffer = ""
+		self.buffer = b""
 		#Determines whether we use IAC GA/EOR to delimit prompts.
 		#If set, any partial lines will be buffered until we get one.
 		self.has_ga = False
@@ -34,7 +35,7 @@ class Connection(object):
 	def handle_data(self, data):
 		"""Handle data received by the MUD."""
 		data = self.buffer + data
-		self.buffer = ""
+		self.buffer = b""
 		curpos = 0
 		while curpos < len(data):
 			iacpos = data.find(IAC, curpos)
@@ -48,7 +49,6 @@ class Connection(object):
 			try:
 				curpos += self.parse_iac(data[curpos:])
 			except NeedMoreDataException:
-				print "in the middle of iac"
 				self.buffer = data[curpos:]
 				return
 		self.parse_all_data()
@@ -56,40 +56,40 @@ class Connection(object):
 	def parse_iac(self, data):
 		if len(data) == 1:
 			raise NeedMoreDataException()
-		if data[1] == IAC:
+		b = data[1:2]
+		if b == IAC:
 			self.parsed += IAC
 			return 2
-		elif data[1] in (GA, EOR):
-			print "ga/eor found"
+		elif b in (GA, EOR):
 			self.has_ga = True
 			self.parse_all_data(True)
 			return 2
-		elif data[1] in (WILL, WONT, DO, DONT):
+		elif b in (WILL, WONT, DO, DONT):
 			if len(data) < 3:
 				raise NeedMoreDataException()
-			self.handle_option(data[1], data[2])
+			self.handle_option(data[1:2], data[2:3])
 			return 3
-		elif data[1] == SB:
+		elif b == SB:
 			pos = data.find(IAC+SE)
 			if pos == -1:
 				raise NeedMoreDataException()
 				return
 			self.handle_subnegotiation(data[:pos+2])
 			return pos+2
-		elif data[1] == NOP:
+		elif b == NOP:
 			return 2
 		else: #Don't know what this is
-			self.parsed += data[1]
+			self.parsed += data[1:2]
 			return 2
 
-	line_re = re.compile(r'\n')
+	line_re = re.compile(br'\n')
 	def parse_all_data(self, force=False):
 		"""Handle any unhandled data received from the mud, and send it for further processing.
 		If force is True, send it anyway, terminator or not. This is used if we detect a GA."""
 		if not self.parsed:
 			return
 		#Muds send \n\r, get rid of the \r
-		self.parsed = self.parsed.replace('\r', '')
+		self.parsed = self.parsed.replace(b'\r', b'')
 		#Split by lines and deal with them
 		cur = 0
 		for match in self.line_re.finditer(self.parsed):
@@ -105,18 +105,17 @@ class Connection(object):
 		elif cur < len(self.parsed) - 1:
 			#Parse the incomplete line
 			remaining = self.parsed[cur:]
-			remaining = remaining.replace('\0', '')
+			remaining = remaining.replace(b'\0', b'')
 			self.world.handle_line(remaining)
 			cur += len(remaining)
 		self.parsed = self.parsed[cur:]
 
 	def handle_subnegotiation(self, data):
-		print "hs: %r" % data
+		pass
 
 	def handle_option(self, type, opt):
 		if type == WILL and opt == chr(25):
 			self.send(IAC+DO+chr(25))
-		print "ok"
 
 	def connect(self, host, port):
 		point = TCP4ClientEndpoint(reactor, host, port)
@@ -136,7 +135,7 @@ class Connection(object):
 		"""Event called when the world disconnected. Clear any
 		connection specific data and prepare for another connection."""
 		self.parse_all_data(True)
-		self.buffer = "" #clear any in-progress IAC sequences
+		self.buffer = b"" #clear any in-progress IAC sequences
 		self.has_ga = False
 		self.world.write_callback("Disconnected, reason: %s\n" % reason.getErrorMessage())
 

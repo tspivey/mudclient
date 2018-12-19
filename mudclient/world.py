@@ -7,6 +7,7 @@ import yaml
 import os
 from triggers import Trigger
 import application
+import six
 
 class World(object):
 
@@ -56,7 +57,11 @@ class World(object):
 				continue
 			if trigger.function is not None:
 				groups = [g or "" for g in match.groups()]
-				trigger.function(self.runtime.table(*groups), matchline)
+				try:
+					trigger.function(self.runtime.table(*groups), matchline)
+				except Exception as e:
+					self.print("Error calling trigger: " + str(e))
+					continue
 			if trigger.omit:
 				return
 			break
@@ -69,7 +74,7 @@ class World(object):
 	def send(self, text):
 		if isinstance(text, unicode):
 			text = text.encode('utf-8')
-		self.connection.send(text+"\n")
+		self.connection.send(text+b"\n")
 
 	def connect(self, host, port):
 		self.connection.connect(host, port)
