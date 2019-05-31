@@ -1,0 +1,8 @@
+twisted
+lupa
+wxpython==4.0.3
+pyyaml
+hg+https://hg.q-continuum.net/platform_utils#egg=platform_utils
+hg+https://hg.q-continuum.net/accessible_output2#egg=accessible_output2
+hg+https://hg.q-continuum.net/libloader#egg=libloader
+hg+https://hg.q-continuum.net/keyboard_handler#egg=keyboard_handler
